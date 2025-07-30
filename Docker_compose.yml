@@ -2,4 +2,61 @@ networks:
   default:
     driver: bridge
     name: roboshop-network
-  
+
+services:
+  frontend:
+    image: vsvicky/frontend:v1
+    container_name: frontend
+    ports:
+     - "80:80"
+    depends_on:
+      - catalogue
+      - cart
+      - user
+      - shipping
+      - payment
+  mongodb:
+    image: vsvicky/mongodb:v1
+    container_name: mongodb
+  catalogue:
+    image: vsvicky/catalogue:v1
+    container_name: catalogue
+    depends_on:
+      - mongodb
+  redis:
+    image: redis:7.0
+    container_name: redis
+  user:
+    image: vsvicky/user:v1
+    container_name: user
+    depends_on:
+      - redis
+      - mongodb
+  cart:
+    image: vsvicky/cart:v1
+    container_name: cart
+    depends_on:
+      - redis
+      - catalogue
+  mysql:
+    image: vsvicky/mysql:v1
+    container_name: mysql
+  shipping:
+    image: vsvicky/shipping:v1
+    container_name: shipping
+    depends_on:
+      - cart
+      - mysql
+  rabbitmq:
+    image: rabbitmq:3
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: roboshop
+      RABBITMQ_DEFAULT_PASS: roboshop123
+  payment:
+    image: vsvicky/payment:v1
+    container_name: payment
+    depends_on:
+      - rabbitmq
+      - user
+      - cart
